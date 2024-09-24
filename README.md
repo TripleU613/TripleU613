@@ -1,0 +1,10 @@
+- 👋 Hi, I’m @TripleU613
+- 👀 I'm interested in Android ROM's 
+- 🌱 I’m currently learning java, Linux and git.
+- 💞️ I’m looking to collaborate on creating custom ROMs 
+- 📫 reach me @ tripleuworld@gmail.com
+- 😄 Pronouns: none. mentally stable.
+- ⚡ Fun fact: I'm a conservative republican.
+- 😐 i never went to college. self taught.
+- ✡️ I'm a proud Jew
+- 🇵🇸 don't free it
