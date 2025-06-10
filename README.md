@@ -2,9 +2,8 @@
 - 👀 I'm interested in Android ROM's 
 - 🌱 I’m currently learning java, Kotlin & Python.
 - 💞️ I’m looking to collaborate on creating custom ROMs 
-- 📫 reach me at tripleuworld@gmail.com
 - 😄 Pronouns: none. i'm mentally stable.
 - ⚡ Fun fact: I'm a conservative republican.
 - 😐 i never went to college. self taught.
 - ✡️ I'm a proud Jew
-- Ah, don't free it
+- 🍉 don't free it
