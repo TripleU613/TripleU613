@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @TripleU613
 - 👀 I'm interested in Android ROM's 
-- 🌱 I’m currently learning java, Linux and git.
+- 🌱 I’m currently learning java, Kotlin & Python.
 - 💞️ I’m looking to collaborate on creating custom ROMs 
 - 📫 reach me at tripleuworld@gmail.com
 - 😄 Pronouns: none. i'm mentally stable.
