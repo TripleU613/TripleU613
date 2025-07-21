@@ -2,36 +2,48 @@
 
 ## 🚀 Custom ROM Developer | Kosher ROM Solutions Specialist
 
-Welcome to my corner of GitHub! I specialize in creating custom ROMs, with a focus on **Kosher ROM solutions** that empower users with more control, privacy, and purpose-driven technology.
+Welcome to my corner of GitHub! I specialize in crafting custom ROMs—especially **Kosher ROM solutions**—empowering users with enhanced control, privacy, and a focus on purposeful technology.
 
 ---
 
 ### 🔥 What I Do
 
-- **Custom ROM Development:** I build and maintain unique Android ROMs tailored for various needs and communities.
+- **Custom ROM Development:** Building and maintaining unique Android ROMs for diverse communities and needs.
 - **Kosher ROM Solutions:** Bridging the gap between modern tech and traditional values—secure, distraction-free, and purpose-built.
-- **5G Dumbphone Enthusiast:** I love making 5G dumbphones smarter (or sometimes, delightfully dumber!).
-- **Project Lead:** Check out my main project: [TripleUMDM_Public](https://github.com/TripleU613/TripleUMDM_Public)
+- **5G Dumbphone Enthusiast:** Making 5G dumbphones smarter (or, at times, blissfully dumber!).
 
 ---
-
 
 ### 🌐 Connect with Me
 
 - **Website & Contact:** [TripleU.org](https://TripleU.org)
-- 
+
 ---
 
 ### 🌟 Featured Project
 
-[![TripleUMDM_Public](https://github-readme-stats.vercel.app/api/pin/?username=TripleU613&repo=TripleUMDM_Public&theme=radical)](https://github.com/TripleU613/TripleUMDM_Public)
+[![TripleUMDM_Public](https://github-readme-stats.vercel.app/api/pin/?username=TripleU613&repo=TripleUMDM_Public&theme=github_dark)](https://github.com/TripleU613/TripleUMDM_Public)
 
-[![trophy](https://github-profile-trophy.vercel.app/?username=TripleU613&theme=radical&no-frame=true&column=4)](https://github.com/ryo-ma/github-profile-trophy)
+---
 
-![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=radical)
+### 🏆 Trophies & Stats
 
-[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=TripleU613&layout=compact&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
+[![Trophy Case](https://github-profile-trophy.vercel.app/?username=TripleU613&theme=github&no-frame=true&column=4)](https://github.com/ryo-ma/github-profile-trophy)
 
-[![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=TripleU613&theme=radical&hide_border=true)](https://github.com/TripleU613)
+![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=github_dark)
 
-![GitHub Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=radical)
+[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=TripleU613&layout=compact&theme=github_dark)](https://github.com/anuraghazra/github-readme-stats)
+
+
+![GitHub Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=github-compact)
+
+
+<!-- Profile Views -->
+![Profile Views](https://komarev.com/ghpvc/?username=TripleU613&style=flat-square&color=4F8A10)
+
+
+<!-- Repository Contributions -->
+![Repos per Language](https://github-contributor-stats.vercel.app/api?username=TripleU613&languages=true&theme=github_dark)
+
+---
+
