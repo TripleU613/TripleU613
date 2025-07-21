@@ -26,9 +26,6 @@ Welcome to my corner of GitHub! I specialize in creating custom ROMs, with a foc
 
 [![TripleUMDM_Public](https://github-readme-stats.vercel.app/api/pin/?username=TripleU613&repo=TripleUMDM_Public&theme=radical)](https://github.com/TripleU613/TripleUMDM_Public)
 
----
----
-
 [![trophy](https://github-profile-trophy.vercel.app/?username=TripleU613&theme=radical&no-frame=true&column=4)](https://github.com/ryo-ma/github-profile-trophy)
 
 ![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=radical)
