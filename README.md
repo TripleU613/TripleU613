@@ -20,28 +20,15 @@ Welcome to my corner of GitHub! I specialize in crafting custom ROMs—especiall
 
 ---
 
-### 🌟 Featured Project
-
 [![TripleUMDM_Public](https://github-readme-stats.vercel.app/api/pin/?username=TripleU613&repo=TripleUMDM_Public&theme=github_dark)](https://github.com/TripleU613/TripleUMDM_Public)
-
----
-
-
 
 ![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=github_dark)
 
 [![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=TripleU613&layout=compact&theme=github_dark)](https://github.com/anuraghazra/github-readme-stats)
 
+![Repos per Language](https://github-contributor-stats.vercel.app/api?username=TripleU613&languages=true&theme=github_dark)
 
 ![GitHub Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=github-compact)
-
-
-<!-- Profile Views -->
-![Profile Views](https://komarev.com/ghpvc/?username=TripleU613&style=flat-square&color=4F8A10)
-
-
-<!-- Repository Contributions -->
-![Repos per Language](https://github-contributor-stats.vercel.app/api?username=TripleU613&languages=true&theme=github_dark)
 
 ---
 
