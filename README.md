@@ -1,4 +1,4 @@
-# 👋 Hi, I’m TripleU613
+# 👋 Hi, I’m TripleU
 
 ## 🚀 Custom ROM Developer | Kosher ROM Solutions Specialist
 
@@ -21,14 +21,28 @@ Welcome to my corner of GitHub! I specialize in creating custom ROMs, with a foc
 
 ---
 
+### 🏆 GitHub Trophy Wall
+
+[![trophy](https://github-profile-trophy.vercel.app/?username=TripleU613&theme=radical&no-frame=true&column=4)](https://github.com/ryo-ma/github-profile-trophy)
+
+---
+
+### 📈 GitHub Stats
+
+![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=radical)
+
+[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=TripleU613&layout=compact&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
+
+[![GitHub Streak](https://streak-stats.demolab.com?user=TripleU613&theme=radical&date_format=M%20j%5B%2C%20Y%5D)](https://git.io/streak-stats)
+
+---
+
 ### 🌐 Connect with Me
 
 - **Website & Contact:** [TripleU.org](https://TripleU.org)
 
----
 
-> “Tech can be smart, but it should also be meaningful.”
 
 ---
 
-![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=radical)
+![GitHub Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=radical)
