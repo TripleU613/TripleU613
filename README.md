@@ -15,34 +15,26 @@ Welcome to my corner of GitHub! I specialize in creating custom ROMs, with a foc
 
 ---
 
+
+### 🌐 Connect with Me
+
+- **Website & Contact:** [TripleU.org](https://TripleU.org)
+- 
+---
+
 ### 🌟 Featured Project
 
 [![TripleUMDM_Public](https://github-readme-stats.vercel.app/api/pin/?username=TripleU613&repo=TripleUMDM_Public&theme=radical)](https://github.com/TripleU613/TripleUMDM_Public)
 
 ---
-
-### 🏆 GitHub Trophy Wall
-
-[![trophy](https://github-profile-trophy.vercel.app/?username=TripleU613&theme=radical&no-frame=true&column=4)](https://github.com/ryo-ma/github-profile-trophy)
-
 ---
 
-### 📈 GitHub Stats
+[![trophy](https://github-profile-trophy.vercel.app/?username=TripleU613&theme=radical&no-frame=true&column=4)](https://github.com/ryo-ma/github-profile-trophy)
 
 ![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=radical)
 
 [![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=TripleU613&layout=compact&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
 
-[![GitHub Streak](https://streak-stats.demolab.com?user=TripleU613&theme=radical&date_format=M%20j%5B%2C%20Y%5D)](https://git.io/streak-stats)
-
----
-
-### 🌐 Connect with Me
-
-- **Website & Contact:** [TripleU.org](https://TripleU.org)
-
-
-
----
+[![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=TripleU613&theme=radical&hide_border=true)](https://github.com/TripleU613)
 
 ![GitHub Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=radical)
