@@ -26,9 +26,7 @@ Welcome to my corner of GitHub! I specialize in crafting custom ROMs—especiall
 
 ---
 
-### 🏆 Trophies & Stats
 
-[![Trophy Case](https://github-profile-trophy.vercel.app/?username=TripleU613&theme=github&no-frame=true&column=4)](https://github.com/ryo-ma/github-profile-trophy)
 
 ![TripleU613's GitHub stats](https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=github_dark)
 
