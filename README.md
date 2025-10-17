@@ -14,7 +14,7 @@ A beautiful, modern bio website with dark mode design, blue accents, and stunnin
 ## Quick Start
 
 ### Option 1: Open directly in browser
-Simply double-click on `index.html` to open the website in your default browser.
+Simply double-click on `index.html` to open the website in your default browser...
 
 ### Option 2: Run local server (recommended for full functionality)
 ```bash
