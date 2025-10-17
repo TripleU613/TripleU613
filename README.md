@@ -8,7 +8,7 @@ A beautiful, modern bio website with dark mode design, blue accents, and stunnin
 🎨 **Stunning Animations**: Smooth transitions, floating particles, and interactive elements
 📱 **Fully Responsive**: Works perfectly on all devices
 💳 **Multiple Payment Options**: Integrated Ko-fi, PayPal, Stripe, and GitHub Sponsors
-🔗 **Social Links**: Quick access to all social profiles and forums
+🔗 **Social Links**: Quick access to all social profiles and forums...
 📞 **Contact Information**: Easy-to-access contact methods
 
 ## Quick Start
