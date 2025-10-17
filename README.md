@@ -4,7 +4,7 @@ A beautiful, modern bio website with dark mode design, blue accents, and stunnin
 
 ## Features
 
-✨ **Dark Mode Design**: Elegant dark theme with blue accent colors and glowing effects
+✨ **Dark Mode Design**: Elegant dark theme with blue accent colors and glowing effects.
 🎨 **Stunning Animations**: Smooth transitions, floating particles, and interactive elements
 📱 **Fully Responsive**: Works perfectly on all devices
 💳 **Multiple Payment Options**: Integrated Ko-fi, PayPal, Stripe, and GitHub Sponsors
