@@ -46,7 +46,7 @@ tripleuorg/
 - Animated gradient background with rotating glow
 - Floating particle system
 - Pulsing profile image with glow effect
-- Text with gradient and glow animations
+- Text with gradient and glow animations.
 - Card hover effects with light sweep
 - Smooth scroll animations
 
