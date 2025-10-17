@@ -34,3 +34,4 @@ test-local.js
 test-api-scraper.js
 test-mitmachim*.js
 mitmachim-*.png
+.vercel
