@@ -1,6 +1,6 @@
 ﻿# 👋 Hi, I'm TripleU
 
-## 🛠️ Custom ROM Developer | Kosher ROM Solutions Specialist
+## 🛠️ Custom ROM Developer | Kosher Tech Solutions Specialist
 
 Purpose-driven Android tinkerer building secure, focused, and community-powered device experiences.
 
@@ -10,6 +10,7 @@ Purpose-driven Android tinkerer building secure, focused, and community-powered 
 
 - **Custom ROM Development:** Tailored Android builds tuned for stability, privacy, and long-term support.
 - **Kosher ROM Solutions:** Curating distraction-free mobile experiences that respect traditional values without sacrificing modern essentials.
+- **Custom MDM Solluttions:** Creating Custom MDMs giving you full control over your users and solid sense of internet security.
 - **5G Dumbphone Experiments:** Exploring minimalist handset setups that keep the best parts of 5G while ditching the noise.
 
 ### 📫 Let's Connect
