@@ -56,17 +56,15 @@ Purpose-driven Android tinkerer building secure, focused, and community-powered 
 </div>
 
 <div align="center">
-  <img src="https://github-contributor-stats.vercel.app/api?username=TripleU613&languages=true&theme=github_dark" alt="Repos per Language" />
-</div>
-
-<div align="center">
   <img src="https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=github-compact" alt="GitHub Activity Graph" />
 </div>
 
 ---
 
-### 🧭 Deep Dive Dashboard
+### 🌐 Profile Footprint
 
 <div align="center">
-  <img src="https://metrics.lecoq.io/TripleU613?template=classic&config.timezone=UTC" alt="GitHub Metrics Overview" />
+  <img src="https://komarev.com/ghpvc/?username=TripleU613&style=for-the-badge&color=1d9bf0" alt="Profile Views" />
+  <img src="https://img.shields.io/github/followers/TripleU613?label=Followers&logo=github&style=for-the-badge" alt="GitHub Followers" />
+  <img src="https://img.shields.io/github/stars/TripleU613?affiliations=OWNER&style=for-the-badge&logo=github" alt="Total Stars" />
 </div>
