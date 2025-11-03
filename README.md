@@ -37,7 +37,7 @@ Purpose-driven Android tinkerer building secure, focused, and community-powered 
 </div>
 
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=github_dark&hide_border=true" alt="GitHub Stats" />
+  <img src="https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=github_dark&hide_border=true&rank_icon=github" alt="GitHub Stats" />
   <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=TripleU613&layout=compact&theme=github_dark&hide_border=true" alt="Top Languages" />
 </div>
 
@@ -46,9 +46,27 @@ Purpose-driven Android tinkerer building secure, focused, and community-powered 
 </div>
 
 <div align="center">
+  <img src="https://github-profile-summary-cards.vercel.app/api/cards/stats?username=TripleU613&theme=github_dark" alt="Summary Stats" />
+  <img src="https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=TripleU613&theme=github_dark" alt="Most Commit Languages" />
+</div>
+
+<div align="center">
+  <img src="https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=TripleU613&theme=github_dark" alt="Repos per Language Summary" />
+  <img src="https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=TripleU613&theme=github_dark&utcOffset=0" alt="Commit Activity by Time" />
+</div>
+
+<div align="center">
   <img src="https://github-contributor-stats.vercel.app/api?username=TripleU613&languages=true&theme=github_dark" alt="Repos per Language" />
 </div>
 
 <div align="center">
   <img src="https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=github-compact" alt="GitHub Activity Graph" />
+</div>
+
+---
+
+### 🧭 Deep Dive Dashboard
+
+<div align="center">
+  <img src="https://metrics.lecoq.io/TripleU613?template=classic&config.timezone=UTC" alt="GitHub Metrics Overview" />
 </div>
