@@ -28,6 +28,11 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
+.dev.vars
+
+# Cloudflare Workers
+.wrangler/
+wrangler.toml.backup
 
 # Test files
 test-local.js
