@@ -1,0 +1,57 @@
+name: Refresh profile cards
+
+on:
+  schedule:
+    # 05:20 UTC daily. Off-the-hour on purpose: the top of the hour is when
+    # every cron on GitHub fires at once and runners queue.
+    - cron: "20 5 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/gen_cards.py
+      - .github/workflows/cards.yml
+
+# Only one refresh at a time, and let a newer run supersede a queued one.
+concurrency:
+  group: profile-cards
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Render cards
+        id: render
+        env:
+          # The default token is plenty: this reads public data only, and the
+          # whole run is a few dozen requests against a 5000/hour ceiling.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if python3 scripts/gen_cards.py; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            # A transient API failure leaves the committed cards untouched, so
+            # the README keeps showing the last good numbers. Warn, don't fail:
+            # a red X on a cosmetic refresh is noise, not a signal.
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Card refresh skipped; keeping the committed cards."
+          fi
+
+      - name: Commit if changed
+        if: steps.render.outputs.ok == 'true'
+        run: |
+          if git diff --quiet -- assets; then
+            echo "No change in the numbers, nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets
+          git commit -m "chore: refresh profile cards"
+          git push
