@@ -52,33 +52,13 @@ bare_metal = "Debian"
 
 ---
 
-## By the numbers
+## stats
 
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/stats-dark.svg">
-  <img alt="Public repos, stars earned, forks and followers" src="assets/stats-light.svg" width="430">
-</picture>
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/languages-dark.svg">
-  <img alt="Language breakdown by bytes across public non-fork repositories" src="assets/languages-light.svg" width="430">
-</picture>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/top-repos-dark.svg">
-  <img alt="Most-starred active repositories" src="assets/top-repos-light.svg" width="880">
-</picture>
-
-</div>
-
-<sub>These cards are rendered by [`scripts/gen_cards.py`](scripts/gen_cards.py) and committed
-straight into this repo, so they're static files — no third-party widget service to go down,
-hit a quota, or leave a broken image behind. A failed refresh just keeps the last good numbers.</sub>
+<img alt="GitHub stats rendered as a pixel terminal, refreshed daily" src="assets/tty.svg" width="880">
 
 ---
 
-## Selected work
+## shipping
 
 | Project | What it is |
 | --- | --- |
@@ -96,7 +76,7 @@ Plus a pile of hardware liberation work: [Tabwee T20 bootloader unlock](https://
 
 ---
 
-## Reach me
+## reach me
 
 | | |
 | --- | --- |
