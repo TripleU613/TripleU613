@@ -9,7 +9,6 @@
 [![Website](https://img.shields.io/badge/tripleu.org-0066ff?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://tripleu.org)
 [![Jtech Forums](https://img.shields.io/badge/Jtech_Forums-111111?style=for-the-badge&logo=discourse&logoColor=white)](https://forums.jtechforums.org/)
 [![Telegram](https://img.shields.io/badge/Telegram-229ED9?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/RNDSoftwareGroup)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/usher-weiss-882820422)
 [![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:tripleuworld@gmail.com)
 
 </div>
