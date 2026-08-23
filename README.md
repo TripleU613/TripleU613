@@ -1,71 +1,93 @@
-﻿# 👋 Hi, I'm TripleU
-
-## 🛠️ Custom ROM Developer | Kosher Tech Solutions Specialist
-
-Purpose-driven Android tinkerer building secure, focused, and community-powered device experiences.
-
----
-
-### 🚀 What I Build
-
-- **Custom ROM Development:** Tailored Android builds tuned for stability, privacy, and long-term support.
-- **Kosher ROM Solutions:** Curating distraction-free mobile experiences that respect traditional values without sacrificing modern essentials.
-- **Custom MDM Solluttions:** Creating Custom MDMs giving you full control over your users and solid sense of internet security.
-- **5G Dumbphone Experiments:** Exploring minimalist handset setups that keep the best parts of 5G while ditching the noise.
-
-### 📫 Let's Connect
-
-- **Website & Contact:** [TripleU.org](https://TripleU.org)
-
----
-
-### 📦 Featured Repo
-
-[![TripleUMDM_Public](https://github-readme-stats.vercel.app/api/pin/?username=TripleU613&repo=TripleUMDM_Public&theme=github_dark&hide_border=true)](https://github.com/TripleU613/TripleUMDM_Public)
-
----
-
-### 📊 Live GitHub Stats
-
 <div align="center">
-  <a href="https://github.com/TripleU613">
-    <img src="https://github-profile-trophy.vercel.app/?username=TripleU613&theme=algolia&column=4&margin-w=15&margin-h=15" alt="GitHub Profile Trophy" />
-  </a>
-</div>
 
-<div align="center">
-  <img src="https://streak-stats.demolab.com?user=TripleU613&theme=dark&hide_border=true" alt="GitHub Streak" />
-</div>
+# TripleU
 
-<div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=TripleU613&show_icons=true&theme=github_dark&hide_border=true&rank_icon=github" alt="GitHub Stats" />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=TripleU613&layout=compact&theme=github_dark&hide_border=true" alt="Top Languages" />
-</div>
+**Software engineer · Network engineer · Kosher tech specialist**
 
-<div align="center">
-  <img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=TripleU613&theme=github_dark" alt="GitHub Profile Details" />
-</div>
+Owner of **Jtech Forums LLC**. I build focused, private, community-powered technology —
+and the networks it runs on.
 
-<div align="center">
-  <img src="https://github-profile-summary-cards.vercel.app/api/cards/stats?username=TripleU613&theme=github_dark" alt="Summary Stats" />
-  <img src="https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=TripleU613&theme=github_dark" alt="Most Commit Languages" />
-</div>
+<br>
 
-<div align="center">
-  <img src="https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=TripleU613&theme=github_dark" alt="Repos per Language Summary" />
-  <img src="https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=TripleU613&theme=github_dark&utcOffset=0" alt="Commit Activity by Time" />
-</div>
+[![Website](https://img.shields.io/badge/tripleu.org-0066ff?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://tripleu.org)
+[![Jtech Forums](https://img.shields.io/badge/Jtech_Forums-111111?style=for-the-badge&logo=discourse&logoColor=white)](https://forums.jtechforums.org/)
+[![Telegram](https://img.shields.io/badge/Telegram-229ED9?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/RNDSoftwareGroup)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/usher-weiss-882820422)
+[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:tripleuworld@gmail.com)
 
-<div align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=TripleU613&theme=github-compact" alt="GitHub Activity Graph" />
 </div>
 
 ---
 
-### 🌐 Profile Footprint
+## whoami
+
+Hi — I'm TripleU.
+
+I write software, wire up the networks it lives on, and spend most of my time on
+**kosher tech**: devices and services stripped down to what actually matters, without
+giving up the modern essentials people genuinely need. That means custom Android
+builds, MDM that gives an admin real control, filtering that holds up, and the
+occasional bootloader that needed convincing.
+
+I love building for the open source community. What I've *sold* doesn't always get to
+be open — that's the trade — but everything I can put out, I do. Day job is full time
+at **RND Software Group**.
+
+If you need a hand with something, my DMs are open.
+
+```toml
+[tripleu]
+roles     = ["software engineer", "network engineer", "kosher tech specialist"]
+company   = "Jtech Forums LLC"          # owner
+day_job   = "RND Software Group"        # full time
+writes    = ["Rust", "Python", "TypeScript"]
+reaches   = ["Kotlin", "Shell", "C"]    # when the hardware insists
+curious   = ["machine learning", "crypto", "operating systems", "AI-assisted coding"]
+
+[tripleu.daily_drivers]
+mobile     = "Android"
+desktop    = "Omarchy"
+bare_metal = "Debian"
+```
+
+---
+
+## stats
+
+<img alt="GitHub stats rendered as a pixel terminal, refreshed daily" src="assets/tty.svg" width="880">
+
+---
+
+## shipping
+
+| Project | What it is |
+| --- | --- |
+| [**TripleUMDM**](https://github.com/TripleU613/TripleUMDM_Public) | Mobile device management built for locked-down fleets — full admin control, real network security. [Docs](https://github.com/TripleU613/mdm-docs) · [tripleumdm.com](https://tripleumdm.com) |
+| **JtechMarketplace** *(private)* | A closed, verified marketplace for tech — eBay, but vetted. Rust/Axum API behind a Next.js front end. |
+| [**tormarchy**](https://github.com/TripleU613/tormarchy) | Omarchy plugin that pushes all your network traffic through Tor. |
+| [**dumbcourse**](https://github.com/TripleU613/dumbcourse) | Forum UI plugin that makes Discourse usable on d-pads and ancient browsers. |
+| [**LashonHoraDetector**](https://github.com/TripleU613/LashonHoraDetector) | Browser extension that filters messages on content, not keywords. |
+| [**claude-teleport**](https://github.com/TripleU613/claude-teleport) | Claude Code skill that moves a live conversation to another machine. |
+| [**Unitree Go1 Pro backup**](https://github.com/TripleU613/Unitree-Go1-Pro-Almost-Full-Backup-) | Near-complete sanitized image set — Pi plus both Jetson Nanos. |
+
+Plus a pile of hardware liberation work: [Tabwee T20 bootloader unlock](https://github.com/TripleU613/Tabwee-T20-Booloader-Unlock),
+[HiBy M300 partition backups](https://github.com/TripleU613/HiBy-M300-Backup),
+[Linux fixes for the OneXPlayer G1](https://github.com/TripleU613/linux-onexplayer-g1).
+
+---
+
+## reach me
+
+| | |
+| --- | --- |
+| **Site & bio** | [tripleu.org](https://tripleu.org) |
+| **Forums** | [forums.jtechforums.org](https://forums.jtechforums.org/) |
+| **Telegram** | [@RNDSoftwareGroup](https://t.me/RNDSoftwareGroup) |
+| **LinkedIn** | [Usher Weiss](https://www.linkedin.com/in/usher-weiss-882820422) |
+| **Email** | [tripleuworld@gmail.com](mailto:tripleuworld@gmail.com) |
+| **Discord** | `tripleu613` |
 
 <div align="center">
-  <img src="https://komarev.com/ghpvc/?username=TripleU613&style=for-the-badge&color=1d9bf0" alt="Profile Views" />
-  <img src="https://img.shields.io/github/followers/TripleU613?label=Followers&logo=github&style=for-the-badge" alt="GitHub Followers" />
-  <img src="https://img.shields.io/github/stars/TripleU613?affiliations=OWNER&style=for-the-badge&logo=github" alt="Total Stars" />
+<br>
+<sub>Building things that respect the people using them.</sub>
 </div>
