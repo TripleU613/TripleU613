@@ -34,14 +34,3 @@ If you’re working on something interesting, need a hand, or just want to talk 
 <img alt="GitHub stats rendered as a pixel terminal, refreshed daily" src="assets/tty.svg" width="880">
 
 ---
-
-## reach me
-
-| | |
-| --- | --- |
-| **Site & bio** | [tripleu.org](https://tripleu.org) |
-| **Forums** | [forums.jtechforums.org](https://forums.jtechforums.org/) |
-| **Telegram** | [@RNDSoftwareGroup](https://t.me/RNDSoftwareGroup) |
-| **LinkedIn** | [Usher Weiss](https://www.linkedin.com/in/usher-weiss-882820422) |
-| **Email** | [tripleuworld@gmail.com](mailto:tripleuworld@gmail.com) |
-| **Discord** | `tripleu613` |
