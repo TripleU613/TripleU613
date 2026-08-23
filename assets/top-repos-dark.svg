@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="196"
+     viewBox="0 0 880 196" role="img" fill="none">
+  <defs>
+    <linearGradient id="accent-top-repos-dark" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0066ff"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <clipPath id="card-top-repos-dark">
+      <rect x="0.5" y="0.5" width="879" height="195" rx="12"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#card-top-repos-dark)">
+    <rect width="880" height="196" fill="#0d1117"/>
+    <rect width="880" height="3" fill="url(#accent-top-repos-dark)"/>
+  </g>
+  <rect x="0.5" y="0.5" width="879" height="195" rx="12"
+        stroke="#1f2530"/>
+
+<text x="24" y="40" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,'Noto Sans',Arial,sans-serif" font-size="15" font-weight="700" fill="#f0f6fc">Currently shipping</text>
+<text x="24" y="58" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,'Noto Sans',Arial,sans-serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#6e7681">MOST-STARRED ACTIVE REPOSITORIES</text>
+<rect x="24" y="68" width="408" height="46" rx="8" fill="#161b22" stroke="#1f2530"/>
+<text x="38" y="86" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="700" fill="#f0f6fc">TripleUMDM_Public</text>
+<text x="418" y="86" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="11" fill="#6e7681">★ 25</text>
+<text x="38" y="103" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,'Noto Sans',Arial,sans-serif" font-size="10.5" fill="#6e7681">Public landing page for TripleUMDM</text>
+<rect x="448" y="68" width="408" height="46" rx="8" fill="#161b22" stroke="#1f2530"/>
+<text x="462" y="86" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="700" fill="#f0f6fc">Unitree-Go1-Pro-Almost-Full-B…</text>
+<text x="842" y="86" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="11" fill="#6e7681">★ 3</text>
+<text x="462" y="103" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,'Noto Sans',Arial,sans-serif" font-size="10.5" fill="#6e7681">Near-complete Unitree Go1 Pro backup (Pi + both Jetson Nanos)</text>
+<rect x="24" y="124" width="408" height="46" rx="8" fill="#161b22" stroke="#1f2530"/>
+<text x="38" y="142" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="700" fill="#f0f6fc">claude-teleport</text>
+<text x="418" y="142" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="11" fill="#6e7681">★ 2</text>
+<text x="38" y="159" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,'Noto Sans',Arial,sans-serif" font-size="10.5" fill="#6e7681">A Claude Code skill that moves your conversation to another m…</text>
+<rect x="448" y="124" width="408" height="46" rx="8" fill="#161b22" stroke="#1f2530"/>
+<text x="462" y="142" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="700" fill="#f0f6fc">mirrorbot-gplay</text>
+<text x="842" y="142" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="11" fill="#6e7681">★ 2</text>
+<text x="462" y="159" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,'Noto Sans',Arial,sans-serif" font-size="10.5" fill="#6e7681">Google Play APK downloader server for MirrorBot</text>
+</svg>
