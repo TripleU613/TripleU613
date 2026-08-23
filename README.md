@@ -1,13 +1,10 @@
 <div align="center">
 
+<img src="assets/profile.gif" width="170" alt="TripleU">
+
 # TripleU
 
-**Software engineer · Network engineer · Kosher tech specialist**
-
-Owner of **Jtech Forums LLC**. I build focused, private, community-powered technology —
-and the networks it runs on.
-
-<br>
+**Owner of JTech Forums LLC · Software Engineer · Network Engineer · Kosher-Tech Specialist**
 
 [![Website](https://img.shields.io/badge/tripleu.org-0066ff?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://tripleu.org)
 [![Jtech Forums](https://img.shields.io/badge/Jtech_Forums-111111?style=for-the-badge&logo=discourse&logoColor=white)](https://forums.jtechforums.org/)
@@ -21,58 +18,23 @@ and the networks it runs on.
 
 ## whoami
 
-Hi — I'm TripleU.
+Hi, I’m TripleU — owner of JTech Forums LLC, software engineer, network engineer, and kosher-tech specialist.
 
-I write software, wire up the networks it lives on, and spend most of my time on
-**kosher tech**: devices and services stripped down to what actually matters, without
-giving up the modern essentials people genuinely need. That means custom Android
-builds, MDM that gives an admin real control, filtering that holds up, and the
-occasional bootloader that needed convincing.
+I mainly work with Rust, Python, and TypeScript, with a strong interest in machine learning, AI, operating systems, networking, and crypto.
 
-I love building for the open source community. What I've *sold* doesn't always get to
-be open — that's the trade — but everything I can put out, I do. Day job is full time
-at **RND Software Group**.
+My daily environment is a mix of Android, Omarchy, and Debian on bare metal.
 
-If you need a hand with something, my DMs are open.
+I love building things for the open-source community and contributing where I can. Not everything I build can be open-sourced — some of it is commercial work, and I do this professionally full-time at RND Software Group.
 
-```toml
-[tripleu]
-roles     = ["software engineer", "network engineer", "kosher tech specialist"]
-company   = "Jtech Forums LLC"          # owner
-day_job   = "RND Software Group"        # full time
-writes    = ["Rust", "Python", "TypeScript"]
-reaches   = ["Kotlin", "Shell", "C"]    # when the hardware insists
-curious   = ["machine learning", "crypto", "operating systems", "AI-assisted coding"]
+I’m always experimenting, building, breaking things, and figuring out better ways to put them back together.
 
-[tripleu.daily_drivers]
-mobile     = "Android"
-desktop    = "Omarchy"
-bare_metal = "Debian"
-```
+If you’re working on something interesting, need a hand, or just want to talk tech, DM me.
 
 ---
 
 ## stats
 
 <img alt="GitHub stats rendered as a pixel terminal, refreshed daily" src="assets/tty.svg" width="880">
-
----
-
-## shipping
-
-| Project | What it is |
-| --- | --- |
-| [**TripleUMDM**](https://github.com/TripleU613/TripleUMDM_Public) | Mobile device management built for locked-down fleets — full admin control, real network security. [Docs](https://github.com/TripleU613/mdm-docs) · [tripleumdm.com](https://tripleumdm.com) |
-| **JtechMarketplace** *(private)* | A closed, verified marketplace for tech — eBay, but vetted. Rust/Axum API behind a Next.js front end. |
-| [**tormarchy**](https://github.com/TripleU613/tormarchy) | Omarchy plugin that pushes all your network traffic through Tor. |
-| [**dumbcourse**](https://github.com/TripleU613/dumbcourse) | Forum UI plugin that makes Discourse usable on d-pads and ancient browsers. |
-| [**LashonHoraDetector**](https://github.com/TripleU613/LashonHoraDetector) | Browser extension that filters messages on content, not keywords. |
-| [**claude-teleport**](https://github.com/TripleU613/claude-teleport) | Claude Code skill that moves a live conversation to another machine. |
-| [**Unitree Go1 Pro backup**](https://github.com/TripleU613/Unitree-Go1-Pro-Almost-Full-Backup-) | Near-complete sanitized image set — Pi plus both Jetson Nanos. |
-
-Plus a pile of hardware liberation work: [Tabwee T20 bootloader unlock](https://github.com/TripleU613/Tabwee-T20-Booloader-Unlock),
-[HiBy M300 partition backups](https://github.com/TripleU613/HiBy-M300-Backup),
-[Linux fixes for the OneXPlayer G1](https://github.com/TripleU613/linux-onexplayer-g1).
 
 ---
 
@@ -86,8 +48,3 @@ Plus a pile of hardware liberation work: [Tabwee T20 bootloader unlock](https://
 | **LinkedIn** | [Usher Weiss](https://www.linkedin.com/in/usher-weiss-882820422) |
 | **Email** | [tripleuworld@gmail.com](mailto:tripleuworld@gmail.com) |
 | **Discord** | `tripleu613` |
-
-<div align="center">
-<br>
-<sub>Building things that respect the people using them.</sub>
-</div>
