@@ -29,8 +29,10 @@ jobs:
       - name: Render cards
         id: render
         env:
-          # The default token is plenty: this reads public data only, and the
-          # whole run is a few dozen requests against a 5000/hour ceiling.
+          # STATS_TOKEN is an optional fine-grained PAT with read access to all
+          # repos, so the card counts private work too. Without it the default
+          # token still renders everything, from public data only.
+          STATS_TOKEN: ${{ secrets.STATS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if python3 scripts/gen_cards.py; then
