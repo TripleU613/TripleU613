@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/profile.gif" width="170" alt="TripleU">
+<img src="assets/avatar.png" width="170" alt="TripleU">
 
 # TripleU
 
