@@ -4,7 +4,7 @@
 
 # TripleU
 
-**Owner of JTech Forums LLC · Software Engineer · Network Engineer · Kosher-Tech Specialist**
+**JTech Forums LLC · Software Engineer · Network Engineer · Kosher-Tech Specialist**
 
 [![Website](https://img.shields.io/badge/tripleu.org-0066ff?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://tripleu.org)
 [![Jtech Forums](https://img.shields.io/badge/Jtech_Forums-111111?style=for-the-badge&logo=discourse&logoColor=white)](https://forums.jtechforums.org/)
