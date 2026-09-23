@@ -24,14 +24,17 @@ jobs:
   render:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Render cards
         id: render
         env:
-          # STATS_TOKEN is an optional fine-grained PAT with read access to all
-          # repos, so the card counts private work too. Without it the default
-          # token still renders everything, from public data only.
+          # STATS_TOKEN is what lets private work reach the public card. It must
+          # be a *classic* PAT created by TripleU613 with scopes `repo`,
+          # `read:org` and `read:user`: a fine-grained PAT is tied to a single
+          # owner and can't see private org repos, so commercial work would be
+          # missing. Without it the default token renders public data only and
+          # the run logs a warning. Only totals are drawn, never repo names.
           STATS_TOKEN: ${{ secrets.STATS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
