@@ -11,6 +11,14 @@ everything, not just public work), with a REST fallback for tokenless runs.
 Only aggregates are rendered — repo names never appear in the output, so a
 broad token cannot leak anything private into the public README.
 
+What the token owner's PAT adds over the default token:
+  * contribution totals summed over every year on GitHub, private included
+  * the heatmap with private-repo activity counted
+  * languages from private repos, and from repos in the user's own orgs that
+    they have committed to (company work that isn't owned by the user)
+With any other token, private activity shows only as the anonymous
+"PRIVATE" count GitHub exposes when the profile setting allows it.
+
 Usage:
     python3 scripts/gen_cards.py                  # fetch live, write assets/
     python3 scripts/gen_cards.py --data d.json    # render from a data file
@@ -25,6 +33,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
+from html import escape
 from pathlib import Path
 
 USER = os.environ.get("PROFILE_USER", "TripleU613")
@@ -158,10 +167,12 @@ class Painter:
     def width(s: str, sc: int = 2) -> int:
         return len(norm(s)) * 6 * sc
 
-    def emit(self, w: int, h: int) -> str:
+    def emit(self, w: int, h: int, title: str = "", desc: str = "") -> str:
         parts = [
             f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
-            f'viewBox="0 0 {w} {h}" role="img">',
+            f'viewBox="0 0 {w} {h}" role="img" aria-labelledby="t d">',
+            f'<title id="t">{escape(title)}</title>',
+            f'<desc id="d">{escape(desc)}</desc>',
             f'<rect width="{w}" height="{h}" fill="{BG}"/>',
             '<g shape-rendering="crispEdges">',
         ]
@@ -210,14 +221,12 @@ def http(url: str, body: bytes | None = None) -> object:
 
 GQL = """
 query($login: String!, $cursor: String) {
+  viewer { login }
   user(login: $login) {
     followers { totalCount }
+    organizations(first: 100) { nodes { login } }
     contributionsCollection {
-      totalCommitContributions
-      restrictedContributionsCount
-      totalPullRequestContributions
-      totalIssueContributions
-      totalPullRequestReviewContributions
+      contributionYears
       contributionCalendar {
         totalContributions
         weeks { contributionDays { contributionCount date } }
@@ -236,13 +245,67 @@ query($login: String!, $cursor: String) {
 }
 """
 
+# Work pushed to organisation repos (JTech Forums, RND, ...) — commercial code
+# lives there, not under the user, so it has to be pulled in separately.
+GQL_CONTRIB = """
+query($login: String!, $cursor: String) {
+  user(login: $login) {
+    repositoriesContributedTo(first: 100, after: $cursor, includeUserRepositories: false,
+                              contributionTypes: [COMMIT, PULL_REQUEST]) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        isFork
+        owner { login }
+        languages(first: 10) { edges { size node { name } } }
+      }
+    }
+  }
+}
+"""
 
-def gql(cursor: str | None) -> dict:
-    body = json.dumps({"query": GQL, "variables": {"login": USER, "cursor": cursor}}).encode()
+YEAR_FIELDS = """
+      totalCommitContributions
+      restrictedContributionsCount
+      totalPullRequestContributions
+      totalIssueContributions
+      totalPullRequestReviewContributions
+"""
+
+
+def gql(query: str, variables: dict) -> dict:
+    body = json.dumps({"query": query, "variables": {"login": USER, **variables}}).encode()
     out = http("https://api.github.com/graphql", body)
     if not isinstance(out, dict) or out.get("errors") or not out.get("data", {}).get("user"):
         raise ValueError(f"graphql: {json.dumps(out)[:300]}")
-    return out["data"]["user"]
+    return out["data"]
+
+
+def lifetime(years: list[int]) -> dict:
+    """Sum every contribution year — the API only hands out one year at a time."""
+    now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    parts = [
+        f'y{y}: contributionsCollection(from: "{y}-01-01T00:00:00Z", '
+        f'to: "{min(f"{y}-12-31T23:59:59Z", now)}") {{{YEAR_FIELDS}}}'
+        for y in years
+    ]
+    q = "query($login: String!) { user(login: $login) { " + "\n".join(parts) + " } }"
+    u = gql(q, {})["user"]
+    tot = {"commits": 0, "prs": 0, "issues": 0, "reviews": 0, "private": 0}
+    for y in years:
+        c = u[f"y{y}"]
+        tot["commits"] += c["totalCommitContributions"]
+        tot["prs"] += c["totalPullRequestContributions"]
+        tot["issues"] += c["totalIssueContributions"]
+        tot["reviews"] += c["totalPullRequestReviewContributions"]
+        # Private work the token can't see in detail. With the owner's own PAT
+        # this is 0 because everything is already counted by type above.
+        tot["private"] += c["restrictedContributionsCount"]
+    return tot
+
+
+def add_langs(langs: dict[str, int], repo: dict) -> None:
+    for e in repo["languages"]["edges"]:
+        langs[e["node"]["name"]] = langs.get(e["node"]["name"], 0) + e["size"]
 
 
 def collect_graphql() -> dict:
@@ -251,37 +314,56 @@ def collect_graphql() -> dict:
     cursor = None
     first = None
     while True:
-        u = gql(cursor)
+        data = gql(GQL, {"cursor": cursor})
+        u = data["user"]
         if first is None:
-            first = u
+            first = data
         repos = u["repositories"]
         for r in repos["nodes"]:
             stars += r["stargazerCount"]
             forks += r["forkCount"]
-            for e in r["languages"]["edges"]:
-                langs[e["node"]["name"]] = langs.get(e["node"]["name"], 0) + e["size"]
+            add_langs(langs, r)
         if not repos["pageInfo"]["hasNextPage"]:
             break
         cursor = repos["pageInfo"]["endCursor"]
 
-    cc = first["contributionsCollection"]
+    viewer = first["viewer"]["login"]
+    u = first["user"]
+    private = viewer.lower() == USER.lower() and bool(os.environ.get("STATS_TOKEN"))
+    print(f"token viewer: {viewer} ({'private + public' if private else 'public only'})")
+
+    # Only org repos the user belongs to: a drive-by PR to a huge OSS project
+    # would otherwise drown the chart in someone else's code.
+    orgs = {o["login"].lower() for o in u["organizations"]["nodes"]}
+    cursor = None
+    org_repos = 0
+    while orgs:
+        rc = gql(GQL_CONTRIB, {"cursor": cursor})["user"]["repositoriesContributedTo"]
+        for r in rc["nodes"]:
+            if not r["isFork"] and r["owner"]["login"].lower() in orgs:
+                add_langs(langs, r)
+                org_repos += 1
+        if not rc["pageInfo"]["hasNextPage"]:
+            break
+        cursor = rc["pageInfo"]["endCursor"]
+    print(f"org repos contributed to: {org_repos}")
+
+    cc = u["contributionsCollection"]
     days = {
         d["date"]: d["contributionCount"]
         for w in cc["contributionCalendar"]["weeks"]
         for d in w["contributionDays"]
     }
     return {
-        "repos": first["repositories"]["totalCount"],
+        "repos": u["repositories"]["totalCount"],
         "stars": stars,
         "forks": forks,
-        "followers": first["followers"]["totalCount"],
+        "followers": u["followers"]["totalCount"],
         "langs": sorted(langs.items(), key=lambda kv: -kv[1]),
         "contrib_total": cc["contributionCalendar"]["totalContributions"],
-        "commits": cc["totalCommitContributions"] + cc["restrictedContributionsCount"],
-        "prs": cc["totalPullRequestContributions"],
-        "issues": cc["totalIssueContributions"],
-        "reviews": cc["totalPullRequestReviewContributions"],
+        **lifetime(cc["contributionYears"]),
         "days": days,
+        "private_view": private,
     }
 
 
@@ -315,11 +397,13 @@ def collect_rest() -> dict:
 
 
 def collect() -> dict:
-    try:
-        return collect_graphql()
-    except Exception as exc:  # noqa: BLE001 - fall back to public REST data
-        print(f"graphql unavailable ({exc}), falling back to REST", file=sys.stderr)
+    if not token():
+        # GraphQL needs a token; this path is only for local tokenless runs.
         return collect_rest()
+    # With a token, never degrade to REST: that would overwrite a card built
+    # from private data with public-only numbers and no graph. Failing keeps
+    # the last good card instead.
+    return collect_graphql()
 
 
 # ---------------------------------------------------------------------------
@@ -362,8 +446,12 @@ def streaks(days: dict[str, int]) -> tuple[int, int]:
         else:
             run = 0
         cur += dt.timedelta(days=1)
-    # current streak counts back from the last recorded day
+    # current streak counts back from the last recorded day. That day is
+    # "today" in UTC, which is usually still empty when the cron fires, so an
+    # empty today doesn't break the streak — it just hasn't started yet.
     cur = end
+    if days.get(cur.isoformat(), 0) == 0:
+        cur -= dt.timedelta(days=1)
     while cur >= start and days.get(cur.isoformat(), 0) > 0:
         current += 1
         cur -= dt.timedelta(days=1)
@@ -390,7 +478,7 @@ def render(d: dict) -> str:
         y += LINE + 8
 
     # --- stats ---
-    prompt("tripleu stats")
+    prompt("tripleu stats --all-time")
     statline([
         ("REPOS", d["repos"]),
         ("STARS", d["stars"]),
@@ -398,12 +486,15 @@ def render(d: dict) -> str:
         ("FOLLOWERS", d["followers"]),
     ])
     extra = [(k.upper(), d[k]) for k in ("commits", "prs", "issues", "reviews") if d.get(k) is not None]
+    if d.get("private"):
+        extra.append(("PRIVATE", d["private"]))
     if extra:
         statline(extra)
     y += 12
 
     # --- contribution graph ---
     days: dict[str, int] = d.get("days") or {}
+    cur_streak, best_streak = streaks(days)
     if days:
         prompt("tripleu graph")
         dates = sorted(days)
@@ -425,7 +516,6 @@ def render(d: dict) -> str:
         y += 7 * (cell + gap) - gap + 14
 
         total = d.get("contrib_total", sum(days.values()))
-        cur_streak, best_streak = streaks(days)
         x = p.text(MX, y, f"{total} ", FG)
         x = p.text(x, y, "CONTRIBUTIONS/YR", MUTED)
         x = p.text(x + 2 * ADV, y, "· STREAK ", MUTED)
@@ -484,7 +574,16 @@ def render(d: dict) -> str:
     p.block(10, H - 12, W - 22, 2, BORDER)
     p.block(10, 8, 2, H - 18, BORDER)
     p.block(W - 12, 8, 2, H - 18, BORDER)
-    return p.emit(W, H)
+    facts = [f"{d['repos']} repos", f"{d['stars']} stars", f"{d['followers']} followers"]
+    facts += [f"{d[k]} {k} all-time" for k in ("commits", "prs", "issues", "reviews") if d.get(k) is not None]
+    if d.get("private"):
+        facts.append(f"{d['private']} private contributions")
+    if days:
+        facts.append(f"{d.get('contrib_total', sum(days.values()))} contributions in the last year, "
+                     f"current streak {cur_streak} days, best {best_streak} days")
+    if langs:
+        facts.append("top languages: " + ", ".join(f"{n} {100 * b / total_b:.1f}%" for n, b in langs))
+    return p.emit(W, H, f"{USER} GitHub stats", "; ".join(facts))
 
 
 # ---------------------------------------------------------------------------
@@ -501,10 +600,13 @@ def main() -> int:
     else:
         try:
             data = collect()
-        except (urllib.error.URLError, urllib.error.HTTPError, ValueError, KeyError) as exc:
+        except (urllib.error.URLError, urllib.error.HTTPError, ValueError, KeyError, TypeError) as exc:
             print(f"fetch failed, keeping existing card: {exc}", file=sys.stderr)
             return 1
         print(f"fetched {data['repos']} repos, {data['stars']} stars")
+        if os.environ.get("GITHUB_ACTIONS") and not data.get("private_view"):
+            print("::warning::STATS_TOKEN is missing or not owned by "
+                  f"{USER}; the card only shows public activity.")
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
