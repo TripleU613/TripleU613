@@ -66,7 +66,7 @@ TOPIC = "gitea-mirror"
 FAILING = "mirror-failing-"
 REFSPECS = ["+refs/heads/*:refs/heads/*", "+refs/tags/*:refs/tags/*"]
 GIT_TIMEOUT = 60 * 60
-SLICE_MB = 250  # a big repo's first copy goes up in pushes of about this size
+SLICE_MB = 100  # a big repo's first copy goes up in pushes of about this size
 # A Gitea pull mirror is a copy of something hosted elsewhere, often GitHub
 # itself; mirroring it back would only duplicate it.
 SKIP_PULL_MIRRORS = True
@@ -311,13 +311,15 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
     try:
         dst = {} if created else git.refs(dst_url)
         result = transfer(repo, gh, git, owner, name, src_url, dst_url, src, dst, created, cache)
-    except Fail:
+    except Fail as exc:
         # Remember the failure against this exact upstream state, so the next
         # runs skip it until Gitea changes instead of retrying a full upload.
         try:
             set_topics(gh, owner, name, keep + [mark])
         except Fail:
             pass
+        if mark not in topics and any(t.startswith(FAILING) for t in topics):
+            raise Fail(f"{exc} (failed again after a change in Gitea)") from None
         raise
     if sorted(topics) != sorted(keep):
         set_topics(gh, owner, name, keep)
@@ -345,7 +347,17 @@ def push_in_slices(git: Git, cache: Path, dst_url: str, branch: str, have: str |
     slices = min(len(todo), math.ceil(size_mb * len(todo) / max(total, 1) / SLICE_MB))
     for i in range(1, slices):
         sha = todo[len(todo) * i // slices - 1]
-        git("-C", str(cache), "push", "--quiet", dst_url, f"+{sha}:refs/heads/{branch}")
+        try:
+            git("-C", str(cache), "push", "--quiet", dst_url, f"+{sha}:refs/heads/{branch}")
+        except Fail as exc:
+            raise Fail(f"{exc} (slice {i} of {slices}; repo is about {size_mb:.0f} MB)") from None
+
+
+def pack_mb(git: Git, cache: Path) -> float:
+    """The real size of the cached copy, which is what a push has to move."""
+    stats = dict(line.split(": ", 1)
+                 for line in git("-C", str(cache), "count-objects", "-v").splitlines())
+    return (int(stats.get("size-pack", 0)) + int(stats.get("size", 0))) / 1024
 
 
 def transfer(repo: dict, gh: GitHub, git: Git, owner: str, name: str, src_url: str,
@@ -363,11 +375,17 @@ def transfer(repo: dict, gh: GitHub, git: Git, owner: str, name: str, src_url: s
     try:
         if src:
             git("-C", str(cache), "fetch", "--quiet", "--prune", src_url, *REFSPECS)
+            size_mb = pack_mb(git, cache)
             default = repo.get("default_branch")
             if default and f"refs/heads/{default}" in src:
                 push_in_slices(git, cache, dst_url, default, dst.get(f"refs/heads/{default}"),
-                               (repo.get("size") or 0) / 1024)
-            git("-C", str(cache), "push", "--quiet", dst_url, *REFSPECS)
+                               size_mb)
+            try:
+                git("-C", str(cache), "push", "--quiet", dst_url, *REFSPECS)
+            except Fail as exc:
+                if size_mb > SLICE_MB:
+                    raise Fail(f"{exc} (final push; repo is about {size_mb:.0f} MB)") from None
+                raise
 
         # Before pruning: GitHub refuses to delete its current default branch,
         # so a renamed default upstream has to be switched over first.
@@ -382,7 +400,7 @@ def transfer(repo: dict, gh: GitHub, git: Git, owner: str, name: str, src_url: s
         if stale:
             git("-C", str(cache), "push", "--quiet", "--prune", dst_url, *REFSPECS)
     except Fail as exc:
-        if "fetch" in str(exc):  # a broken fetch may have left the cache half-done
+        if str(exc).startswith("git fetch"):  # a broken fetch may leave the cache half-done
             shutil.rmtree(cache, ignore_errors=True)
         raise
     return "created" if created else "updated"
