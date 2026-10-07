@@ -1,0 +1,49 @@
+name: Mirror Gitea
+
+on:
+  schedule:
+    # Every 15 minutes, off the quarter-hours where every other cron lands.
+    # A sync with nothing new only compares branch tips and pushes nothing.
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+  # Instant sync: anything that POSTs {"event_type": "gitea-push"} to this
+  # repo's /dispatches endpoint (e.g. a relay for a Gitea webhook).
+  repository_dispatch:
+    types: [gitea-push]
+  push:
+    branches: [main]
+    paths:
+      - scripts/mirror_gitea.py
+      - .github/workflows/mirror.yml
+
+# One sync at a time, and never cancel one halfway through a push: a newer
+# trigger waits its turn instead.
+concurrency:
+  group: gitea-mirror
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    # Gitea is only reachable over the tailnet, which this runner is on.
+    runs-on: debiantripleu-ci
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Mirror
+        env:
+          # GITEA_URL: the Gitea address as reachable from the runner (kept
+          #   secret so the internal address stays out of this public repo).
+          # GITEA_TOKEN: Gitea token with read:repository, from a site admin
+          #   so every user's and org's repos are visible.
+          # MIRROR_TOKEN: fine-grained GitHub PAT for TripleU613, all repos,
+          #   with Administration, Contents and Workflows read/write.
+          GITEA_URL: ${{ secrets.GITEA_URL }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+        run: python3 scripts/mirror_gitea.py
