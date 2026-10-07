@@ -297,8 +297,10 @@ def lifetime(years: list[int]) -> dict:
         tot["prs"] += c["totalPullRequestContributions"]
         tot["issues"] += c["totalIssueContributions"]
         tot["reviews"] += c["totalPullRequestReviewContributions"]
-        # Private work the token can't see in detail. With the owner's own PAT
-        # this is 0 because everything is already counted by type above.
+        # Private work GitHub won't break down for this token. Not always 0
+        # even with the owner's own PAT: contributions to repos it can't reach
+        # (e.g. orgs that restrict classic PATs) stay hidden. None of it is
+        # counted by type above, so nothing is counted twice.
         tot["private"] += c["restrictedContributionsCount"]
     return tot
 
@@ -499,7 +501,9 @@ def render(d: dict) -> str:
         prompt("tripleu graph")
         dates = sorted(days)
         end = dt.date.fromisoformat(dates[-1])
-        start = end - dt.timedelta(days=end.weekday() + 1 + 51 * 7)  # 52 sunday-aligned weeks
+        # 52 sunday-aligned weeks; % 7 so a Sunday starts its own week rather
+        # than reaching back a whole extra one
+        start = end - dt.timedelta(days=(end.weekday() + 1) % 7 + 51 * 7)
         nonzero = sorted(v for v in days.values() if v > 0)
         q = [nonzero[int(len(nonzero) * f)] for f in (0.25, 0.5, 0.75)] if nonzero else [1, 2, 3]
         cell, gap = 12, 3
