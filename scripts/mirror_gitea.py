@@ -50,6 +50,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -65,6 +66,7 @@ TOPIC = "gitea-mirror"
 FAILING = "mirror-failing-"
 REFSPECS = ["+refs/heads/*:refs/heads/*", "+refs/tags/*:refs/tags/*"]
 GIT_TIMEOUT = 60 * 60
+SLICE_MB = 250  # a big repo's first copy goes up in pushes of about this size
 # A Gitea pull mirror is a copy of something hosted elsewhere, often GitHub
 # itself; mirroring it back would only duplicate it.
 SKIP_PULL_MIRRORS = True
@@ -322,6 +324,30 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
     return result
 
 
+def push_in_slices(git: Git, cache: Path, dst_url: str, branch: str, have: str | None,
+                   size_mb: float) -> None:
+    """Push a big branch's history oldest first, in slices of about SLICE_MB.
+
+    GitHub refuses a push over 2 GB and drops very long uploads (a ~1 hour
+    push came back HTTP 500). Each slice moves the branch to an older commit,
+    so only the remainder is left for the full push that follows. A run that
+    dies halfway resumes from wherever the branch got to on GitHub.
+    """
+    ref = f"refs/heads/{branch}"
+    total = int(git("-C", str(cache), "rev-list", "--count", "--first-parent", ref))
+    if have:
+        try:
+            git("-C", str(cache), "cat-file", "-e", f"{have}^{{commit}}")
+            ref = f"{have}..{ref}"
+        except Fail:
+            pass  # GitHub's tip isn't upstream history; send it all
+    todo = git("-C", str(cache), "rev-list", "--first-parent", "--reverse", ref).split()
+    slices = min(len(todo), math.ceil(size_mb * len(todo) / max(total, 1) / SLICE_MB))
+    for i in range(1, slices):
+        sha = todo[len(todo) * i // slices - 1]
+        git("-C", str(cache), "push", "--quiet", dst_url, f"+{sha}:refs/heads/{branch}")
+
+
 def transfer(repo: dict, gh: GitHub, git: Git, owner: str, name: str, src_url: str,
              dst_url: str, src: dict, dst: dict, created: bool, cache: Path) -> str:
     if src == dst:
@@ -337,6 +363,10 @@ def transfer(repo: dict, gh: GitHub, git: Git, owner: str, name: str, src_url: s
     try:
         if src:
             git("-C", str(cache), "fetch", "--quiet", "--prune", src_url, *REFSPECS)
+            default = repo.get("default_branch")
+            if default and f"refs/heads/{default}" in src:
+                push_in_slices(git, cache, dst_url, default, dst.get(f"refs/heads/{default}"),
+                               (repo.get("size") or 0) / 1024)
             git("-C", str(cache), "push", "--quiet", dst_url, *REFSPECS)
 
         # Before pruning: GitHub refuses to delete its current default branch,
