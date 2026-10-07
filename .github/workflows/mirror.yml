@@ -6,6 +6,11 @@ on:
     # A sync with nothing new only compares branch tips and pushes nothing.
     - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
+    inputs:
+      retry_failed:
+        description: Retry repos that failed before, even if nothing changed in Gitea
+        type: boolean
+        default: false
   # Instant sync: anything that POSTs {"event_type": "gitea-push"} to this
   # repo's /dispatches endpoint (e.g. a relay for a Gitea webhook).
   repository_dispatch:
@@ -29,7 +34,9 @@ jobs:
   mirror:
     # Gitea is only reachable over the tailnet, which this runner is on.
     runs-on: debiantripleu-ci
-    timeout-minutes: 60
+    # Generous for the first copy of a big repo. Later runs only move what
+    # changed and take seconds.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v5
         with:
@@ -46,4 +53,5 @@ jobs:
           GITEA_URL: ${{ secrets.GITEA_URL }}
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+          MIRROR_RETRY_FAILED: ${{ inputs.retry_failed }}
         run: python3 scripts/mirror_gitea.py
