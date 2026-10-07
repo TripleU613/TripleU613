@@ -21,9 +21,17 @@ Gitea is the source of truth: anything pushed to a mirror directly is
 overwritten on the next sync. Mirrors of repos deleted from Gitea are left
 alone, never deleted.
 
+The runner is shared, so a sync has to stay cheap:
+  * each repo is kept in a cache on the runner, so a change upstream fetches
+    only the new objects instead of the whole history;
+  * a repo that fails is marked with a `mirror-failing-<fingerprint>` topic and
+    skipped until something changes in Gitea, rather than being re-uploaded in
+    full every 15 minutes. Running the workflow by hand with "retry failed"
+    tries them all again.
+
 This runs in a public repo, so the log is public. Repo names never reach it:
-each repo is reported by a short hash of its Gitea name, and git's own output
-is swallowed. To map a hash back:
+each repo is reported by a short hash of its Gitea name, and git's errors are
+shown with URLs, refs, paths and emails cut out. To map a hash back:
     python3 -c 'import hashlib,sys; print(hashlib.sha256(sys.argv[1].encode()).hexdigest()[:10])' owner/name
 
 Env:
@@ -31,6 +39,9 @@ Env:
     GITEA_TOKEN     Gitea access token, scope read:repository
     MIRROR_TOKEN    GitHub token for the account that owns the mirrors
     GITHUB_API_URL, GITHUB_SERVER_URL   set by Actions; default to github.com
+    MIRROR_CACHE    where to keep the repo cache; defaults to the runner's
+                    tool cache, or a throwaway directory outside Actions
+    MIRROR_RETRY_FAILED  "true" to retry repos marked as failing
     MIRROR_VERBOSE  set to print full errors (local runs only: they name repos)
 """
 
@@ -40,19 +51,24 @@ import base64
 import hashlib
 import json
 import os
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import urllib.error
 import urllib.request
 from collections import Counter
+from pathlib import Path
 
 TOPIC = "gitea-mirror"
+FAILING = "mirror-failing-"
 REFSPECS = ["+refs/heads/*:refs/heads/*", "+refs/tags/*:refs/tags/*"]
-GIT_TIMEOUT = 30 * 60
+GIT_TIMEOUT = 60 * 60
 # A Gitea pull mirror is a copy of something hosted elsewhere, often GitHub
 # itself; mirroring it back would only duplicate it.
 SKIP_PULL_MIRRORS = True
+RETRY_FAILED = os.environ.get("MIRROR_RETRY_FAILED", "").lower() == "true"
 VERBOSE = bool(os.environ.get("MIRROR_VERBOSE"))
 
 
@@ -146,16 +162,33 @@ class GitHub:
 
 REASONS = [
     ("GH001", "a file is over GitHub's 100 MB limit"),
+    ("GH007", "GitHub refused commits carrying an email you keep private; turn off "
+              "\"Block command line pushes that expose my email\" at github.com/settings/emails"),
+    ("pack exceeds maximum allowed size", "the push is over GitHub's 2 GB limit"),
     ("refusing to allow", "MIRROR_TOKEN can't push workflow files; it needs the Workflows permission"),
     ("Authentication failed", "authentication failed"),
     ("could not read Username", "authentication failed"),
     ("error: 403", "permission denied"),
     ("Permission to", "permission denied"),
-    ("not found", "repository not found"),
+    ("Repository not found", "repository not found"),
     ("Could not resolve host", "network error"),
     ("Failed to connect", "network error"),
-    ("timed out", "network error"),
 ]
+
+
+def excerpt(stderr: str) -> str:
+    """git's own error lines, with anything that could name a repo, branch,
+    file or person cut out, so they're safe for a public log."""
+    out: list[str] = []
+    for line in stderr.splitlines():
+        line = line.strip()
+        if not re.match(r"(fatal|error|remote: (fatal|error)|! \[)", line):
+            continue
+        line = re.sub(r"\] .* -> \S+", "]", line)  # ref update lines
+        line = re.sub(r"\S+://\S+|'[^']*'|\"[^\"]*\"|refs/\S+|\S+\.git\b|\S+@\S+", "…", line)
+        line = re.sub(r"\b(File|Permission to|path:?|refspec|destination:?) \S+", r"\1 …", line)
+        out.append(line)
+    return "; ".join(dict.fromkeys(out))[:400]
 
 
 def git_env(gitea_url: str, gitea_token: str, server: str, gh_token: str) -> dict:
@@ -169,6 +202,10 @@ def git_env(gitea_url: str, gitea_token: str, server: str, gh_token: str) -> dic
         ("credential.helper", ""),
         (f"http.{gitea_url.rstrip('/')}/.extraHeader", f"Authorization: token {gitea_token}"),
         (f"http.{server.rstrip('/')}/.extraHeader", f"Authorization: Basic {basic}"),
+        # Give up on a transfer that has stalled, rather than on one that is
+        # merely big: under 1 KB/s for 10 minutes.
+        ("http.lowSpeedLimit", "1000"),
+        ("http.lowSpeedTime", "600"),
     ]
     env["GIT_CONFIG_COUNT"] = str(len(config))
     for i, (key, value) in enumerate(config):
@@ -183,16 +220,16 @@ class Git:
         self.env = env
 
     def __call__(self, *args: str) -> str:
+        sub = args[2] if args[0] == "-C" else args[0]
         try:
             proc = subprocess.run(["git", *args], env=self.env, capture_output=True, check=False,
                                   text=True, timeout=GIT_TIMEOUT)
         except subprocess.TimeoutExpired:
-            raise Fail("git timed out") from None
+            raise Fail(f"git {sub}: still running after {GIT_TIMEOUT // 60} minutes") from None
         if proc.returncode != 0:
             detail(proc.stderr.strip())
-            reason = next((why for needle, why in REASONS if needle in proc.stderr),
-                          f"git exited {proc.returncode}")
-            raise Fail(f"git {args[0] if args[0] != '-C' else args[2]}: {reason}")
+            reason = next((why for needle, why in REASONS if needle in proc.stderr), None)
+            raise Fail(f"git {sub}: {reason or excerpt(proc.stderr) or f'exited {proc.returncode}'}")
         return proc.stdout
 
     def refs(self, url: str) -> dict[str, str]:
@@ -215,12 +252,21 @@ def mirror_name(full_name: str) -> str:
     return f"{owner}-{name}"[:100]
 
 
+def fingerprint(refs: dict[str, str]) -> str:
+    return hashlib.sha256("\n".join(f"{r} {s}" for r, s in sorted(refs.items())).encode()).hexdigest()[:12]
+
+
 def actions_off(gh: GitHub, owner: str, name: str) -> None:
     gh.must("PUT", f"/repos/{owner}/{name}/actions/permissions", {"enabled": False}, 204,
             "disabling Actions")
 
 
-def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str) -> str:
+def set_topics(gh: GitHub, owner: str, name: str, topics: list[str]) -> None:
+    gh.must("PUT", f"/repos/{owner}/{name}/topics", {"names": topics}, 200, "tagging")
+
+
+def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str,
+         cache: Path) -> str:
     full = repo["full_name"]
     name = mirror_name(full)
     # The ownership mark: set when the mirror is created, and naming its exact
@@ -248,23 +294,50 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
         raise Fail("conflict: a public GitHub repo has this mirror's name; not touching it")
     elif target.get("description") != marker:
         raise Fail("conflict: a GitHub repo that isn't this mirror has its name; not touching it")
-    if TOPIC not in (target.get("topics") or []):
-        gh.must("PUT", f"/repos/{owner}/{name}/topics", {"names": [TOPIC]}, 200, "tagging")
+
+    topics = target.get("topics") or []
+    keep = [t for t in topics if not t.startswith(FAILING)]
+    keep += [] if TOPIC in keep else [TOPIC]
 
     src_url = f"{gitea.url}/{full}.git"
     dst_url = f"{server.rstrip('/')}/{owner}/{name}.git"
     src = git.refs(src_url)
-    dst = {} if created else git.refs(dst_url)
+    mark = FAILING + fingerprint(src)
+    if mark in topics and not RETRY_FAILED:
+        return "still failing"
+
+    try:
+        dst = {} if created else git.refs(dst_url)
+        result = transfer(repo, gh, git, owner, name, src_url, dst_url, src, dst, created, cache)
+    except Fail:
+        # Remember the failure against this exact upstream state, so the next
+        # runs skip it until Gitea changes instead of retrying a full upload.
+        try:
+            set_topics(gh, owner, name, keep + [mark])
+        except Fail:
+            pass
+        raise
+    if sorted(topics) != sorted(keep):
+        set_topics(gh, owner, name, keep)
+    return result
+
+
+def transfer(repo: dict, gh: GitHub, git: Git, owner: str, name: str, src_url: str,
+             dst_url: str, src: dict, dst: dict, created: bool, cache: Path) -> str:
     if src == dst:
         return "created (empty)" if created else "unchanged"
 
     if not created:
         actions_off(gh, owner, name)  # in case someone switched it back on
-    with tempfile.TemporaryDirectory(prefix="mirror-", dir=os.environ.get("RUNNER_TEMP")) as tmp:
-        git("init", "--bare", "--quiet", tmp)
+    if not src:
+        shutil.rmtree(cache, ignore_errors=True)  # nothing upstream: push from empty
+    if not (cache / "HEAD").exists():
+        shutil.rmtree(cache, ignore_errors=True)
+        git("init", "--bare", "--quiet", str(cache))
+    try:
         if src:
-            git("-C", tmp, "fetch", "--quiet", src_url, *REFSPECS)
-            git("-C", tmp, "push", "--quiet", dst_url, *REFSPECS)
+            git("-C", str(cache), "fetch", "--quiet", "--prune", src_url, *REFSPECS)
+            git("-C", str(cache), "push", "--quiet", dst_url, *REFSPECS)
 
         # Before pruning: GitHub refuses to delete its current default branch,
         # so a renamed default upstream has to be switched over first.
@@ -277,14 +350,31 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
 
         stale = {ref for ref in dst if not ref.endswith("^{}")} - src.keys()
         if stale:
-            git("-C", tmp, "push", "--quiet", "--prune", dst_url, *REFSPECS)
+            git("-C", str(cache), "push", "--quiet", "--prune", dst_url, *REFSPECS)
+    except Fail as exc:
+        if "fetch" in str(exc):  # a broken fetch may have left the cache half-done
+            shutil.rmtree(cache, ignore_errors=True)
+        raise
     return "created" if created else "updated"
 
 
 # ---------------------------------------------------------------------------
 
 
+def cache_root() -> tuple[Path, bool]:
+    """(directory, persistent?). On the runner the tool cache survives between
+    jobs; anywhere else a throwaway directory keeps runs self-contained."""
+    configured = os.environ.get("MIRROR_CACHE") or (
+        os.path.join(os.environ["RUNNER_TOOL_CACHE"], "gitea-mirror")
+        if os.environ.get("RUNNER_TOOL_CACHE") else "")
+    if configured:
+        Path(configured).mkdir(parents=True, exist_ok=True)
+        return Path(configured), True
+    return Path(tempfile.mkdtemp(prefix="gitea-mirror-")), False
+
+
 def main() -> int:
+    sys.stdout.reconfigure(line_buffering=True)  # show progress live, not at exit
     missing = [k for k in ("GITEA_URL", "GITEA_TOKEN", "MIRROR_TOKEN") if not os.environ.get(k)]
     if missing:
         print(f"::error::missing secrets: {', '.join(missing)}")
@@ -309,9 +399,10 @@ def main() -> int:
     except Fail as exc:
         print(f"::error::{exc}")
         return 1
-    print(f"{len(repos)} Gitea repos")
+    root, persistent = cache_root()
+    print(f"{len(repos)} Gitea repos{', retrying failed ones' if RETRY_FAILED else ''}")
+
     counts: Counter[str] = Counter()
-    problems: list[tuple[str, str]] = []
     claimed: set[str] = set()
     for repo in repos:
         full = repo["full_name"]
@@ -320,27 +411,36 @@ def main() -> int:
             continue
         if mirror_name(full).lower() in claimed:
             counts["failed"] += 1
-            problems.append((rid(full), "conflict: another Gitea repo maps to the same GitHub name"))
+            print(f"::error::{rid(full)}: conflict: another Gitea repo maps to the same GitHub name")
             continue
         claimed.add(mirror_name(full).lower())
         try:
-            result = sync(repo, gitea, gh, git, owner, server)
+            result = sync(repo, gitea, gh, git, owner, server, root / f"{rid(full)}.git")
         except Fail as exc:
             counts["failed"] += 1
-            problems.append((rid(full), str(exc)))
+            print(f"::error::{rid(full)}: {exc}")
             continue
         except Exception as exc:  # one bad repo mustn't stop the rest
             counts["failed"] += 1
-            problems.append((rid(full), f"unexpected {type(exc).__name__}"))
+            print(f"::error::{rid(full)}: unexpected {type(exc).__name__}")
             continue
         counts[result] += 1
-        if result != "unchanged":
+        if result == "still failing":
+            print(f"::warning::{rid(full)}: failed before and nothing changed in Gitea since; "
+                  "skipped (run by hand with \"retry failed\" to try again)")
+        elif result != "unchanged":
             print(f"  {rid(full)} {result}")
 
+    if persistent:  # drop the cache of repos that are gone from Gitea
+        live = {f"{rid(r['full_name'])}.git" for r in repos}
+        for stale in root.glob("*.git"):
+            if stale.name not in live:
+                shutil.rmtree(stale, ignore_errors=True)
+    else:
+        shutil.rmtree(root, ignore_errors=True)
+
     print(", ".join(f"{n} {what}" for what, n in sorted(counts.items())) or "nothing to do")
-    for repo_id, why in problems:
-        print(f"::error::{repo_id}: {why}")
-    return 1 if problems else 0
+    return 1 if counts["failed"] else 0
 
 
 if __name__ == "__main__":
