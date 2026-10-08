@@ -24,10 +24,12 @@ alone, never deleted.
 The runner is shared, so a sync has to stay cheap:
   * each repo is kept in a cache on the runner, so a change upstream fetches
     only the new objects instead of the whole history;
-  * a repo that fails is marked with a `mirror-failing-<fingerprint>` topic and
-    skipped until something changes in Gitea, rather than being re-uploaded in
-    full every 15 minutes. Running the workflow by hand with "retry failed"
-    tries them all again.
+  * a repo that fails is marked with a `mirror-failing-<fingerprint>-<day>`
+    topic and skipped until something changes in Gitea or the UTC day turns
+    over, rather than being re-uploaded in full every run. So a fix on either
+    side heals within a day on its own; running the workflow by hand with
+    "retry failed" tries them all at once;
+  * a repo over MAX_MB is skipped with a warning: GitHub can't hold it.
 
 This runs in a public repo, so the log is public. Repo names never reach it:
 each repo is reported by a short hash of its Gitea name, and git's errors are
@@ -57,6 +59,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from collections import Counter
@@ -67,6 +70,9 @@ FAILING = "mirror-failing-"
 REFSPECS = ["+refs/heads/*:refs/heads/*", "+refs/tags/*:refs/tags/*"]
 GIT_TIMEOUT = 60 * 60
 SLICE_MB = 100  # a big repo's first copy goes up in pushes of about this size
+# GitHub's practical ceiling for a repo. Anything bigger fails after an hour of
+# uploading (an 11 GB repo did, twice), so it is skipped up front instead.
+MAX_MB = 5000
 # A Gitea pull mirror is a copy of something hosted elsewhere, often GitHub
 # itself; mirroring it back would only duplicate it.
 SKIP_PULL_MIRRORS = True
@@ -271,6 +277,10 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
          cache: Path) -> str:
     full = repo["full_name"]
     name = mirror_name(full)
+    gitea_mb = (repo.get("size") or 0) / 1024
+    if gitea_mb > MAX_MB:  # checked before creating anything, so no empty mirror
+        shutil.rmtree(cache, ignore_errors=True)
+        return f"too big for GitHub (about {gitea_mb:.0f} MB)"
     # The ownership mark: set when the mirror is created, and naming its exact
     # source, so neither an unrelated repo nor another Gitea repo's mirror is
     # ever pushed over.
@@ -304,9 +314,14 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
     src_url = f"{gitea.url}/{full}.git"
     dst_url = f"{server.rstrip('/')}/{owner}/{name}.git"
     src = git.refs(src_url)
-    mark = FAILING + fingerprint(src)
+    # A failure is remembered for this exact upstream state and this UTC day:
+    # skipped until Gitea changes or the day turns over, so a fix made on the
+    # GitHub or Gitea side heals within a day without anyone re-running it.
+    fp = FAILING + fingerprint(src)
+    mark = f"{fp}-{time.strftime('%Y%m%d', time.gmtime())}"
     if mark in topics and not RETRY_FAILED:
         return "still failing"
+    changed = any(t.startswith(FAILING) for t in topics) and not any(t.startswith(fp) for t in topics)
 
     try:
         dst = {} if created else git.refs(dst_url)
@@ -318,7 +333,7 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
             set_topics(gh, owner, name, keep + [mark])
         except Fail:
             pass
-        if mark not in topics and any(t.startswith(FAILING) for t in topics):
+        if changed:
             raise Fail(f"{exc} (failed again after a change in Gitea)") from None
         raise
     if sorted(topics) != sorted(keep):
@@ -376,6 +391,9 @@ def transfer(repo: dict, gh: GitHub, git: Git, owner: str, name: str, src_url: s
         if src:
             git("-C", str(cache), "fetch", "--quiet", "--prune", src_url, *REFSPECS)
             size_mb = pack_mb(git, cache)
+            if size_mb > MAX_MB:
+                shutil.rmtree(cache, ignore_errors=True)
+                return f"too big for GitHub (about {size_mb:.0f} MB)"
             default = repo.get("default_branch")
             if default and f"refs/heads/{default}" in src:
                 push_in_slices(git, cache, dst_url, default, dst.get(f"refs/heads/{default}"),
@@ -472,10 +490,12 @@ def main() -> int:
             counts["failed"] += 1
             print(f"::error::{rid(full)}: unexpected {type(exc).__name__}")
             continue
-        counts[result] += 1
+        counts[result.split(" (")[0]] += 1
         if result == "still failing":
-            print(f"::warning::{rid(full)}: failed before and nothing changed in Gitea since; "
-                  "skipped (run by hand with \"retry failed\" to try again)")
+            print(f"::warning::{rid(full)}: failed earlier today and nothing changed in Gitea "
+                  "since; skipped until it changes or tomorrow (or run by hand with \"retry failed\")")
+        elif result.startswith("too big"):
+            print(f"::warning::{rid(full)}: {result}; skipped")
         elif result != "unchanged":
             print(f"  {rid(full)} {result}")
 
