@@ -28,7 +28,8 @@ The runner is shared, so a sync has to stay cheap:
     topic and skipped until something changes in Gitea or the UTC day turns
     over, rather than being re-uploaded in full every run. So a fix on either
     side heals within a day on its own; running the workflow by hand with
-    "retry failed" tries them all at once;
+    "retry failed" tries them all at once. A file over 100 MB skips the daily
+    retry: only a change in Gitea can fix that;
   * a repo over MAX_MB is skipped with a warning: GitHub can't hold it.
 
 This runs in a public repo, so the log is public. Repo names never reach it:
@@ -317,9 +318,12 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
     # A failure is remembered for this exact upstream state and this UTC day:
     # skipped until Gitea changes or the day turns over, so a fix made on the
     # GitHub or Gitea side heals within a day without anyone re-running it.
+    # A file over 100 MB is the exception: only rewriting history in Gitea
+    # fixes it, and that changes the fingerprint anyway, so its mark carries no
+    # day and a daily retry would only fail again.
     fp = FAILING + fingerprint(src)
     mark = f"{fp}-{time.strftime('%Y%m%d', time.gmtime())}"
-    if mark in topics and not RETRY_FAILED:
+    if (mark in topics or fp in topics) and not RETRY_FAILED:
         return "still failing"
     changed = any(t.startswith(FAILING) for t in topics) and not any(t.startswith(fp) for t in topics)
 
@@ -330,7 +334,7 @@ def sync(repo: dict, gitea: Gitea, gh: GitHub, git: Git, owner: str, server: str
         # Remember the failure against this exact upstream state, so the next
         # runs skip it until Gitea changes instead of retrying a full upload.
         try:
-            set_topics(gh, owner, name, keep + [mark])
+            set_topics(gh, owner, name, keep + [fp if "100 MB" in str(exc) else mark])
         except Fail:
             pass
         if changed:
@@ -492,8 +496,9 @@ def main() -> int:
             continue
         counts[result.split(" (")[0]] += 1
         if result == "still failing":
-            print(f"::warning::{rid(full)}: failed earlier today and nothing changed in Gitea "
-                  "since; skipped until it changes or tomorrow (or run by hand with \"retry failed\")")
+            print(f"::warning::{rid(full)}: failed before and nothing changed in Gitea since; "
+                  "skipped until it changes, or the daily retry if the cause can be fixed "
+                  "elsewhere (or run by hand with \"retry failed\")")
         elif result.startswith("too big"):
             print(f"::warning::{rid(full)}: {result}; skipped")
         elif result != "unchanged":
