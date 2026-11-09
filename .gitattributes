@@ -1,0 +1,7 @@
+# The site's source is encrypted in the repository (git-crypt). With the key
+# unlocked it reads normally; on GitHub and in a plain clone it is binary.
+# The deploy workflow unlocks it, builds the obfuscated bundle and ships that.
+site/index.html filter=git-crypt diff=git-crypt
+site/404.html filter=git-crypt diff=git-crypt
+site/*.js filter=git-crypt diff=git-crypt
+site/*.css filter=git-crypt diff=git-crypt
