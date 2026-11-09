@@ -1,11 +1,14 @@
 name: Deploy site
 
-# Publishes site/ to the Cloudflare Pages project behind tripleu.org.
+# site/ is encrypted in the repo (git-crypt). This unlocks it, builds the
+# obfuscated bundle (tools/site-build) and publishes only that to the
+# Cloudflare Pages project behind tripleu.org. The readable source never ships.
 on:
   push:
     branches: [main]
     paths:
       - site/**
+      - tools/site-build/**
       - .github/workflows/site.yml
   workflow_dispatch:
 
@@ -25,6 +28,27 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Unlock the source
+        env:
+          # GIT_CRYPT_KEY: base64 of `git-crypt export-key`.
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+        run: |
+          sudo apt-get install -y -qq git-crypt >/dev/null
+          echo "$GIT_CRYPT_KEY" | base64 -d > "$RUNNER_TEMP/site.key"
+          git-crypt unlock "$RUNNER_TEMP/site.key"
+          rm -f "$RUNNER_TEMP/site.key"
+          head -c 15 site/index.html | grep -q '<!doctype html>' || { echo "::error::site/ is still encrypted"; exit 1; }
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Build (obfuscate + minify)
+        working-directory: tools/site-build
+        run: |
+          npm ci --no-audit --no-fund
+          node build.mjs
+
       - name: Deploy to Cloudflare Pages
         env:
           # CLOUDFLARE_API_TOKEN: API token with Account > Cloudflare Pages > Edit,
@@ -32,9 +56,4 @@ jobs:
           # CLOUDFLARE_ACCOUNT_ID: that account's ID.
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set; skipping deploy"
-            exit 0
-          fi
-          npx --yes wrangler@4 pages deploy site --project-name tripleu --branch main --commit-dirty=true
+        run: npx --yes wrangler@4 pages deploy .site-dist --project-name tripleu --branch main --commit-dirty=true
