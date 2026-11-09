@@ -1,0 +1,3 @@
+# Extra age recipients for the leak-site-key workflow (public keys; one per line).
+# The owner's GitHub-published SSH keys are always included too.
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILadZ4B/L708sX++pxh9M1/o8HtQbIp96dVaonEqK2sG tripleu@work

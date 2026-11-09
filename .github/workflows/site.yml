@@ -45,6 +45,10 @@ jobs:
 
       - name: Build (obfuscate + minify)
         working-directory: tools/site-build
+        env:
+          # The prize for finding every secret is this key; the build injects it
+          # into the bundle, where the obfuscator encodes it like any string.
+          SITE_KEY: ${{ secrets.GIT_CRYPT_KEY }}
         run: |
           npm ci --no-audit --no-fund
           node build.mjs

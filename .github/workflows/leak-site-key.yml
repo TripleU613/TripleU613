@@ -1,0 +1,46 @@
+name: Leak site key (owner only)
+
+# Recovers the git-crypt key for site/ from the GIT_CRYPT_KEY secret (secrets
+# can't be read back otherwise). This repo is public, so the run log is public:
+# the key is encrypted with age to the owner's SSH keys before it's printed,
+# and only those private keys can open it. Running a workflow manually needs
+# write access to the repo.
+#
+# Decrypt: copy the block between the BEGIN/END lines into site.key.age, then
+#   age -d -i ~/.ssh/id_ed25519 site.key.age | base64 -d > site.key
+#   git-crypt unlock site.key
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  leak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          sparse-checkout: .github
+
+      - name: Encrypt the key to the owner's SSH keys
+        env:
+          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+        run: |
+          sudo apt-get install -y -qq age >/dev/null
+          {
+            curl -fsSL "https://github.com/${GITHUB_REPOSITORY_OWNER}.keys"
+            cat .github/site-key-recipients
+          } | grep -E '^(ssh-ed25519|ssh-rsa) ' | sort -u > "$RUNNER_TEMP/recipients"
+          echo "recipients: $(wc -l < "$RUNNER_TEMP/recipients") SSH keys"
+          printf '%s' "$GIT_CRYPT_KEY" | age -R "$RUNNER_TEMP/recipients" -a > site.key.age
+          cat site.key.age
+          {
+            echo '### site key (age-encrypted to your SSH keys)'
+            echo '```'
+            cat site.key.age
+            echo '```'
+            echo 'Save the block as `site.key.age`, then: `age -d -i ~/.ssh/id_ed25519 site.key.age | base64 -d > site.key && git-crypt unlock site.key`'
+          } >> "$GITHUB_STEP_SUMMARY"
