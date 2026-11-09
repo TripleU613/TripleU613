@@ -1,0 +1,40 @@
+name: Deploy site
+
+# Publishes site/ to the Cloudflare Pages project behind tripleu.org.
+on:
+  push:
+    branches: [main]
+    paths:
+      - site/**
+      - .github/workflows/site.yml
+  workflow_dispatch:
+
+concurrency:
+  group: site-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Deploy to Cloudflare Pages
+        env:
+          # CLOUDFLARE_API_TOKEN: API token with Account > Cloudflare Pages > Edit,
+          #   from the Cloudflare account that owns tripleu.org.
+          # CLOUDFLARE_ACCOUNT_ID: that account's ID.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set; skipping deploy"
+            exit 0
+          fi
+          npx --yes wrangler@4 pages deploy site --project-name tripleu --branch main --commit-dirty=true
