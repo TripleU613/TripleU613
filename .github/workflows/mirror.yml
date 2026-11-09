@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - scripts/mirror_gitea.py
+      - .github/actions/unlock/**
       - .github/workflows/mirror.yml
 
 # One sync at a time, and never cancel one halfway through a push: a newer
@@ -30,6 +31,12 @@ jobs:
         with:
           persist-credentials: false
 
+      # scripts/ is encrypted in the repo; locked again in the last step.
+      - name: Unlock
+        uses: ./.github/actions/unlock
+        with:
+          key: ${{ secrets.GIT_CRYPT_KEY }}
+
       - name: Mirror
         env:
           # GITEA_URL: the Gitea address as reachable from the runner (kept
@@ -42,3 +49,7 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: python3 scripts/mirror_gitea.py
+
+      - name: Lock
+        if: always()
+        run: git-crypt lock --force 2>/dev/null || true

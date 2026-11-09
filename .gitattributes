@@ -1,7 +1,11 @@
-# The site's source is encrypted in the repository (git-crypt). With the key
-# unlocked it reads normally; on GitHub and in a plain clone it is binary.
-# The deploy workflow unlocks it, builds the obfuscated bundle and ships that.
-site/index.html filter=git-crypt diff=git-crypt
-site/404.html filter=git-crypt diff=git-crypt
-site/*.js filter=git-crypt diff=git-crypt
-site/*.css filter=git-crypt diff=git-crypt
+# Everything in this repository is encrypted with git-crypt except what GitHub
+# itself has to read: the profile README and its images, the workflows, the
+# license and these git files. With the key unlocked it all reads normally;
+# on GitHub and in a plain clone the rest is binary.
+* filter=git-crypt diff=git-crypt
+/README.md !filter !diff
+/LICENSE !filter !diff
+/.gitattributes !filter !diff
+/.gitignore !filter !diff
+.github/** !filter !diff
+assets/** !filter !diff
