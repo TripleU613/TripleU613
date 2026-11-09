@@ -1,0 +1,32 @@
+name: Unlock repository
+description: >
+  Decrypts the git-crypt-encrypted files in the checkout. Installs git-crypt
+  without root if it's missing (apt-get download + dpkg -x), so it also works
+  on the self-hosted runner. Pair with a final `git-crypt lock --force` step on
+  self-hosted runners, so nothing decrypted stays behind in the workspace.
+inputs:
+  key:
+    description: base64 of `git-crypt export-key` (the GIT_CRYPT_KEY secret)
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GIT_CRYPT_KEY: ${{ inputs.key }}
+      run: |
+        if ! command -v git-crypt >/dev/null; then
+          dir="$RUNNER_TEMP/git-crypt"
+          mkdir -p "$dir"
+          (cd "$dir" && apt-get download -qq git-crypt && dpkg -x git-crypt_*.deb .)
+          echo "$dir/usr/bin" >> "$GITHUB_PATH"
+          export PATH="$dir/usr/bin:$PATH"
+        fi
+        key="$RUNNER_TEMP/repo.key"
+        printf '%s' "$GIT_CRYPT_KEY" | base64 -d > "$key"
+        git-crypt unlock "$key"
+        rm -f "$key"
+        head -c 3 README.md >/dev/null
+        if [ -f site/index.html ] && ! head -c 15 site/index.html | grep -q '<!doctype html>'; then
+          echo "::error::the repository is still encrypted"; exit 1
+        fi

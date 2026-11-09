@@ -1,6 +1,6 @@
 name: Deploy site
 
-# site/ is encrypted in the repo (git-crypt). This unlocks it, builds the
+# The repo is encrypted (git-crypt). This unlocks it, builds the
 # obfuscated bundle (tools/site-build) and publishes only that to the
 # Cloudflare Pages project behind tripleu.org. The readable source never ships.
 on:
@@ -10,6 +10,7 @@ on:
       - site/**
       - tools/site-build/**
       - .github/workflows/site.yml
+      - .github/actions/unlock/**
   workflow_dispatch:
 
 concurrency:
@@ -29,15 +30,9 @@ jobs:
           persist-credentials: false
 
       - name: Unlock the source
-        env:
-          # GIT_CRYPT_KEY: base64 of `git-crypt export-key`.
-          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
-        run: |
-          sudo apt-get install -y -qq git-crypt >/dev/null
-          echo "$GIT_CRYPT_KEY" | base64 -d > "$RUNNER_TEMP/site.key"
-          git-crypt unlock "$RUNNER_TEMP/site.key"
-          rm -f "$RUNNER_TEMP/site.key"
-          head -c 15 site/index.html | grep -q '<!doctype html>' || { echo "::error::site/ is still encrypted"; exit 1; }
+        uses: ./.github/actions/unlock
+        with:
+          key: ${{ secrets.GIT_CRYPT_KEY }}
 
       - uses: actions/setup-node@v5
         with:
