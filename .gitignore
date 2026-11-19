@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .site-dist/
 tools/site-build/node_modules/
+.dev.vars
+.wrangler/
