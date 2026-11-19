@@ -79,3 +79,16 @@ jobs:
             curl -sf -X DELETE -H "$auth" "$api/$id?force=true" > /dev/null && deleted=$((deleted + 1)) || echo "could not delete $id"
           done
           echo "kept $newest, deleted $deleted"
+
+      - name: Purge the tripleu.org cache
+        # JS is cached at the edge for 30 days; clear it so no old bundle lingers.
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          zone=$(curl -s -H "$auth" "https://api.cloudflare.com/client/v4/zones?name=tripleu.org" | jq -r '.result[0].id // empty')
+          [ -n "$zone" ] || { echo "token can't see the tripleu.org zone (needs Zone:Read + Cache Purge)"; exit 1; }
+          curl -s -X POST -H "$auth" -H "content-type: application/json" \
+            "https://api.cloudflare.com/client/v4/zones/$zone/purge_cache" --data '{"purge_everything":true}' \
+            | jq -e '.success' > /dev/null && echo "cache purged" || { echo "purge refused (token needs Cache Purge)"; exit 1; }
